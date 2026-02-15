@@ -1,13 +1,13 @@
 ---
 title: "The Art of Phishing — Part Two: Cloning, Detection & Evasion"
-date: 2025-11-07 01:00:00 +0200
+date: 2025-11-08 00:00:00 +0200
 categories: [Phishing, Red Team]
 tags: [phishing, cloning, detection-evasion, canary-tokens, push-security, red-team]
 description: "Deep dive into phishing: What is Cloning, 4 Cloning Methods, 6 Detection Mechanisms, and Evasion Techniques."
 toc: true
 image:
-  path: /assets/img/dbgman-banner.webp
-  alt: DbgMan
+  path: /assets/img/phishing-part2/img_06.webp
+  alt: Website Cloning Detection Methods
 ---
 
 > *Hi — I'm DebuggerMan, a Red Teamer.*
