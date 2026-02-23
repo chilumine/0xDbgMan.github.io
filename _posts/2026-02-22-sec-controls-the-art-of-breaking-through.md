@@ -58,20 +58,20 @@ A mature evasion strategy has three properties:
 
 ## The Security Controls Kill Chain
 
-| Control | Layer | Privilege to Bypass | Detection Risk |
-|---------|-------|---------------------|----------------|
-| SmartScreen | Pre-execution | Low (MOTW removal) | Medium |
-| Windows Defender Static | File scan | Low (obfuscation) | Low-Medium |
-| AMSI | Runtime (.NET/PS) | Medium (patch) | Medium |
-| AppLocker | User-mode policy | Low (writable paths) | Medium |
-| WDAC | Kernel policy | High (kernel) | Medium-High |
-| ASR Rules | MDAV kernel | Medium (bypass rules) | Medium |
-| Sysmon | Kernel driver | High (kernel) | High |
-| ETW | Kernel/user | Medium (patch) | High |
-| EDR Hooks | User-mode ntdll | Low (fresh copy) | High |
-| EDR Callbacks | Kernel | Very High (driver) | Critical |
-| PPL (LSASS) | Kernel object | Very High (driver) | Critical |
-| Credential Guard | VBS/VSM | Critical (hardware) | Critical |
+| Control | Layer | Privilege to Bypass |
+|---------|-------|---------------------|
+| SmartScreen | Pre-execution | Low (MOTW removal) |
+| Windows Defender Static | File scan | Low (obfuscation) |
+| AMSI | Runtime (.NET/PS) | Medium (patch) |
+| AppLocker | User-mode policy | Low (writable paths) |
+| WDAC | Kernel policy | High (kernel) |
+| ASR Rules | MDAV kernel | Medium (bypass rules) |
+| Sysmon | Kernel driver | High (kernel) |
+| ETW | Kernel/user | Medium (patch) |
+| EDR Hooks | User-mode ntdll | Low (fresh copy) |
+| EDR Callbacks | Kernel | Very High (driver) |
+| PPL (LSASS) | Kernel object | Very High (driver) |
+| Credential Guard | VBS/VSM | Critical (hardware) |
 
 ---
 
@@ -596,14 +596,14 @@ WDAC (formerly Device Guard Code Integrity) is Microsoft's **kernel-level** appl
 
 **Key difference from AppLocker:**
 
-| Feature | AppLocker | WDAC |
-|---------|-----------|------|
-| Enforcement Layer | User mode (AppIDSvc) | Kernel mode (CI.dll, WdFilter) |
-| DLL Control | Optional | Full |
-| Script Control | Yes | Yes (with UMCI) |
-| Bypass difficulty | Low-Medium | Medium-High |
-| Admin bypass | Possible | Harder |
-| Policy format | Registry | XML → .CIP binary |
+| Feature | AppLocker |
+|---------|-----------|
+| Enforcement Layer | User mode (AppIDSvc) |
+| DLL Control | Optional |
+| Script Control | Yes |
+| Bypass difficulty | Low-Medium |
+| Admin bypass | Possible |
+| Policy format | Registry |
 
 ### Policy Architecture
 
@@ -635,12 +635,12 @@ ConvertTo-WDACCodeIntegrityPolicy `
 
 ### Rule Options That Matter
 
-| Option | Impact | Red Team Relevance |
-|--------|--------|-------------------|
-| **Audit Mode** | Logs only, doesn't block | **If in audit mode, you can run anything** |
-| **UMCI** | Restricts user-mode + kernel | If disabled, only drivers restricted |
-| **Dynamic Code Security** | Restricts .NET JIT / dynamic assemblies | If disabled, reflective load works |
-| **Runtime FilePath Rule Protection** | Writability check on path rules | If disabled, path rules are weaker |
+| Option | Impact |
+|--------|--------|
+| **Audit Mode** | Logs only, doesn't block |
+| **UMCI** | Restricts user-mode + kernel |
+| **Dynamic Code Security** | Restricts .NET JIT / dynamic assemblies |
+| **Runtime FilePath Rule Protection** | Writability check on path rules |
 
 **Check if a policy is in audit mode:**
 ```powershell
@@ -941,15 +941,15 @@ ASR rules operate at the **kernel level** via the WdFilter.sys driver  the same 
 
 ### Key ASR Rules and Bypass
 
-| Rule Name | GUID | Blocks | Bypass |
-|-----------|------|--------|--------|
-| Block Office apps spawning child processes | D4F940AB-401B-4EFC-AADC-AD5F3C50688A | Word/Excel → cmd.exe | Use COM objects, DDE, or trusted child processes |
-| Block Office apps from creating executable content | 3B576869-A4EC-4529-8536-B80A7769E899 | Office writing .exe files | Write to trusted path first |
-| Block execution of potentially obfuscated scripts | 5BEB7EFE-FD9A-4556-801D-275E5FFC04CC | Obfuscated PS/JS | Reduce obfuscation, use different encoding |
-| Block credential stealing from LSASS | 9E6C4E1F-7D60-472F-BA1A-A39EF669E4B0 | OpenProcess on LSASS | Use MiniDump API alternatives, dump from Volume Shadow Copy |
-| Block untrusted/unsigned processes from USB | B2B3F03D-6A65-4F7B-A9C7-1C7EF74A9BA4 | USB .exe files | Sign or deliver via network |
-| Block Win32 API calls from Office macros | 92E97FA1-2EDF-4476-BDD6-9DD0B4DDDC7B | P/Invoke in macros | Use COM, XLM macros, or VBA MSForms |
-| Block abuse of exploited vulnerable signed drivers | 56A863A9-875C-4D65-AF7B-90D77AB80064 | BYOVD on blocklist | Use driver not on BYOVD blocklist |
+| Rule Name | GUID | Blocks |
+|-----------|------|--------|
+| Block Office apps spawning child processes | D4F940AB-401B-4EFC-AADC-AD5F3C50688A | Word/Excel → cmd.exe |
+| Block Office apps from creating executable content | 3B576869-A4EC-4529-8536-B80A7769E899 | Office writing .exe files |
+| Block execution of potentially obfuscated scripts | 5BEB7EFE-FD9A-4556-801D-275E5FFC04CC | Obfuscated PS/JS |
+| Block credential stealing from LSASS | 9E6C4E1F-7D60-472F-BA1A-A39EF669E4B0 | OpenProcess on LSASS |
+| Block untrusted/unsigned processes from USB | B2B3F03D-6A65-4F7B-A9C7-1C7EF74A9BA4 | USB .exe files |
+| Block Win32 API calls from Office macros | 92E97FA1-2EDF-4476-BDD6-9DD0B4DDDC7B | P/Invoke in macros |
+| Block abuse of exploited vulnerable signed drivers | 56A863A9-875C-4D65-AF7B-90D77AB80064 | BYOVD on blocklist |
 
 **Enumerate ASR rules:**
 ```powershell
@@ -1040,19 +1040,19 @@ Sysmon (System Monitor) is a **Sysinternals tool / kernel driver** that logs det
 
 ### Key Sysmon Event IDs
 
-| Event ID | Description | Red Team Impact |
-|----------|-------------|-----------------|
-| 1 | Process creation | Every exec logged with full command line + parent |
-| 3 | Network connection | Every outbound connection with PID |
-| 6 | Driver loaded | BYOVD detection |
-| 7 | Image loaded | DLL load with hash |
-| 8 | CreateRemoteThread | Cross-process injection detected |
-| 10 | Process accessed | OpenProcess on LSASS detected |
-| 11 | File created | Dropped files logged |
-| 12/13 | Registry events | Persistence registry keys |
-| 17/18 | Named pipe | Named pipe C2 detected |
-| 22 | DNS query | DNS C2 resolution logged |
-| 25 | Process tampering | Process hollowing / doppelganging |
+| Event ID | Description |
+|----------|-------------|
+| 1 | Process creation |
+| 3 | Network connection |
+| 6 | Driver loaded |
+| 7 | Image loaded |
+| 8 | CreateRemoteThread |
+| 10 | Process accessed |
+| 11 | File created |
+| 12/13 | Registry events |
+| 17/18 | Named pipe |
+| 22 | DNS query |
+| 25 | Process tampering |
 
 ### Attacking Sysmon  T1562.001
 
@@ -1794,17 +1794,17 @@ Load a legitimate, digitally-signed Windows driver that contains exploitable vul
 
 **Commonly abused vulnerable drivers:**
 
-| Driver | Source | Vulnerability | Used By |
-|--------|--------|---------------|---------|
-| `RTCore64.sys` | MSI Afterburner | CVE-2019-16098  arbitrary physical memory R/W | BlackByte, CheekyBlinder |
-| `procexp152.sys` | Process Explorer (Sysinternals) | Process termination IOCTL | Terminator (SpyBoy), BackStab |
-| `gdrv.sys` | GIGABYTE tools | Arbitrary physical memory R/W | Multiple APTs |
-| `DBUtil_2_3.sys` | Dell firmware utility | CVE-2021-21551  kernel memory R/W | LockBit, multiple |
-| `truesight.sys` (v2.0.2) | RogueKiller Antirootkit (Adlice) | Pre-2015 signing loophole | RansomHub  **2,500+ hash variants** |
-| `ene.sys` | ENE Technology | Physical memory access | Lazarus Group |
-| `WinRing0x64.sys` | OpenHardwareMonitor | MSR and physical memory access | Coin miners, APTs |
-| `aswArPot.sys` | Avast Anti-Rootkit | Process termination | AvosLocker |
-| `zemana*.sys` | Zemana Anti-Malware | Kernel process termination | Terminator |
+| Driver | Source | Vulnerability |
+|--------|--------|---------------|
+| `RTCore64.sys` | MSI Afterburner | CVE-2019-16098  arbitrary physical memory R/W |
+| `procexp152.sys` | Process Explorer (Sysinternals) | Process termination IOCTL |
+| `gdrv.sys` | GIGABYTE tools | Arbitrary physical memory R/W |
+| `DBUtil_2_3.sys` | Dell firmware utility | CVE-2021-21551  kernel memory R/W |
+| `truesight.sys` (v2.0.2) | RogueKiller Antirootkit (Adlice) | Pre-2015 signing loophole |
+| `ene.sys` | ENE Technology | Physical memory access |
+| `WinRing0x64.sys` | OpenHardwareMonitor | MSR and physical memory access |
+| `aswArPot.sys` | Avast Anti-Rootkit | Process termination |
+| `zemana*.sys` | Zemana Anti-Malware | Kernel process termination |
 
 **Driver signing loophole:** Drivers signed before July 29, 2015 with a valid cross-certificate are still accepted by Windows  even on Windows 11. The `truesight.sys` v2.0.2 exploits this: attackers generate thousands of hash variants of the same old signed driver to evade hash-based blocklists.
 
